@@ -163,24 +163,30 @@
   <aside class="modal" id="resumeModal" aria-hidden="true">
     <div class="modal-backdrop" data-resume-close></div>
     <form class="modal-panel resume-modal-panel" id="resumeForm">
-      <button type="button" class="close-btn" data-resume-close aria-label="关闭">×</button>
-      <p class="eyebrow">RESUME FACTORY</p>
-      <h2>生成岗位专用简历</h2>
-      <p class="form-help">先确认岗位和JD，再复制任务给AI。AI只使用项目中已有的真实材料，并生成经过排版检查的DOCX。</p>
-      <label class="full-label">选择岗位<select id="resumeJobSelect"></select></label>
-      <div class="form-grid">
-        <label>公司<input id="resumeCompany" readonly></label>
-        <label>岗位<input id="resumeRole" readonly></label>
-        <label>城市<input id="resumeCity" readonly></label>
-        <label>简历方向<select id="resumeFocus"><option>测试验证</option><option>应用技术</option><option>制造工艺</option></select></label>
-      </div>
-      <label class="full-label">完整JD或内推文字<textarea id="resumeJD" placeholder="可补充粘贴完整岗位职责和任职要求。没有完整JD也可以先生成核验任务。"></textarea></label>
-      <label class="full-label">本次补充说明<textarea id="resumeExtra" class="short-textarea" placeholder="例如：重点突出德语、压缩某段经历、公司要求两页以内……"></textarea></label>
-      <div class="truth-note">固定边界：不编造成绩、项目、专利、工具熟练度和量化成果；德国实验按小组共同参与表述；论文只使用项目中可核实的信息。</div>
-      <div class="resume-output-box">
-        <label class="full-label">已生成的文件名<input id="resumeFileName" placeholder="例如：陈杰_2027届简历_测试验证_公司_岗位.docx"></label>
-        <button type="button" class="ghost-btn" id="saveResumeLink">关联到这个岗位</button>
-        <p class="form-help" id="resumeLinkHint">AI生成完成后会自动填写；也可以在这里手动登记文件名。</p>
+      <header class="resume-modal-header">
+        <div>
+          <p class="eyebrow">RESUME FACTORY</p>
+          <h2>生成岗位专用简历</h2>
+          <p class="form-help">确认岗位和JD后，复制任务给AI生成并检查DOCX。</p>
+        </div>
+        <button type="button" class="close-btn" data-resume-close aria-label="关闭">×</button>
+      </header>
+      <div class="resume-modal-body">
+        <label class="full-label">选择岗位<select id="resumeJobSelect"></select></label>
+        <div class="form-grid">
+          <label>公司<input id="resumeCompany" readonly></label>
+          <label>岗位<input id="resumeRole" readonly></label>
+          <label>城市<input id="resumeCity" readonly></label>
+          <label>简历方向<select id="resumeFocus"><option>测试验证</option><option>应用技术</option><option>制造工艺</option></select></label>
+        </div>
+        <label class="full-label">完整JD或内推文字<textarea id="resumeJD" placeholder="可补充粘贴完整岗位职责和任职要求。没有完整JD也可以先生成核验任务。"></textarea></label>
+        <label class="full-label">本次补充说明<textarea id="resumeExtra" class="short-textarea" placeholder="例如：重点突出德语、压缩某段经历、公司要求两页以内……"></textarea></label>
+        <div class="truth-note">固定边界：不编造成绩、项目、专利、工具熟练度和量化成果；德国实验按小组共同参与表述；论文只使用项目中可核实的信息。</div>
+        <div class="resume-output-box">
+          <label class="full-label">已生成的文件名<input id="resumeFileName" placeholder="例如：陈杰_2027届简历_测试验证_公司_岗位.docx"></label>
+          <button type="button" class="ghost-btn" id="saveResumeLink">关联到这个岗位</button>
+          <p class="form-help" id="resumeLinkHint">AI生成完成后会自动填写；也可以在这里手动登记文件名。</p>
+        </div>
       </div>
       <div class="modal-actions resume-actions">
         <button type="button" class="ghost-btn" id="downloadResumeTask">下载任务单</button>

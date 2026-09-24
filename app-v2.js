@@ -317,6 +317,7 @@
     els.resumeJobSelect.innerHTML = candidates.map(j => `<option value="${escapeHtml(j.id)}">${escapeHtml(j.company)}｜${escapeHtml(j.role)}｜${escapeHtml(j.city || '待核实')}</option>`).join('');
     populateResumeForm(job || candidates[0]);
     els.resumeModal.classList.add('open'); els.resumeModal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
+    const body = els.resumeForm.querySelector('.resume-modal-body'); if (body) body.scrollTop = 0;
   }
   function closeResumeModal() { els.resumeModal.classList.remove('open'); els.resumeModal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
   function buildResumePrompt(job) {
@@ -391,4 +392,5 @@
   els.resumeModal.querySelectorAll('[data-resume-close]').forEach(x => x.addEventListener('click', closeResumeModal));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeModal(); closeResumeModal(); } });
   persist(); render(); refreshOnlineJobs(false);
+  if (location.hash === '#resume-factory') openResumeModal();
 })();
