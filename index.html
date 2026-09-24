@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b5c55">
+  <meta name="robots" content="noindex,nofollow">
+  <title>陈杰 · 2027秋招看板</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">2027 AUTUMN RECRUITMENT</p>
+      <h1>陈杰的秋招看板</h1>
+      <p class="subtitle">上海 · 苏州 · 杭州｜测试验证 · 应用技术 · 制造工艺</p>
+    </div>
+    <div class="header-actions">
+
+      <button class="ghost-btn" id="resumeFactoryBtn">简历工厂</button>
+      <button class="ghost-btn" id="addJobBtn">导入岗位</button>
+      <button class="ghost-btn" id="restoreBtn">恢复备份</button>
+      <button class="ghost-btn" id="exportBtn">备份数据</button>
+      <button class="primary-btn" id="focusBtn">只看优先项</button>
+      <input id="restoreInput" type="file" accept="application/json,.json" hidden>
+    </div>
+  </header>
+
+  <main>
+    <section class="sync-strip" id="syncStrip">
+      <div><i id="syncDot"></i><span><strong id="syncTitle">本地数据已载入</strong><small id="syncDetail">正在检测联网更新能力</small></span></div>
+      <button class="sync-btn" id="syncBtn">检查更新</button>
+    </section>
+
+    <section class="summary" id="summary"></section>
+
+    <section class="resume-factory" aria-labelledby="resumeFactoryTitle">
+      <div>
+        <p class="eyebrow">RESUME FACTORY</p>
+        <h2 id="resumeFactoryTitle">一岗一版简历</h2>
+        <p>选择岗位后自动整理公司、JD、匹配证据和能力缺口，交给AI生成并检查岗位版DOCX。</p>
+      </div>
+      <div class="factory-status">
+        <span><strong id="resumeLinkedCount">0</strong> 个岗位已关联专用简历</span>
+        <span><strong id="resumeRequestCount">0</strong> 个岗位已发起定制</span>
+        <button class="primary-btn" id="resumeFactoryMainBtn">选择岗位生成简历</button>
+      </div>
+    </section>
+
+    <section class="command-center" aria-labelledby="todayTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ACTION CENTER</p>
+          <h2 id="todayTitle">今天先做什么</h2>
+        </div>
+        <p>自动按结论、资料准备度和截止日期排序</p>
+      </div>
+      <div class="action-columns">
+        <article class="action-panel">
+          <div class="panel-title"><span>优先推进</span><strong id="readyCount">0</strong></div>
+          <div id="readyQueue" class="mini-list"></div>
+        </article>
+        <article class="action-panel">
+          <div class="panel-title"><span>待核实 / 受阻</span><strong id="triageCount">0</strong></div>
+          <div id="triageQueue" class="mini-list"></div>
+        </article>
+        <article class="action-panel">
+          <div class="panel-title"><span>临近截止</span><strong id="deadlineCount">0</strong></div>
+          <div id="deadlineQueue" class="mini-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="pipeline" aria-labelledby="pipelineTitle">
+      <div class="section-heading compact">
+        <div><p class="eyebrow">PIPELINE</p><h2 id="pipelineTitle">投递进度</h2></div>
+        <p>点击阶段即可筛选岗位</p>
+      </div>
+      <div class="pipeline-row" id="pipelineRow"></div>
+    </section>
+
+    <section class="toolbar" aria-label="岗位筛选">
+      <label class="searchbox">
+        <span>搜索</span>
+        <input id="searchInput" type="search" placeholder="公司、岗位、城市、技能……" autocomplete="off">
+      </label>
+      <label>结论<select id="decisionFilter"></select></label>
+      <label>状态<select id="statusFilter"></select></label>
+      <label>城市<select id="cityFilter"></select></label>
+      <label>简历<select id="resumeFilter"></select></label>
+      <label>排序
+        <select id="sortSelect">
+          <option value="priority">优先级</option>
+          <option value="company">公司</option>
+          <option value="deadline">截止日期</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="result-head">
+      <div><strong id="resultCount">0</strong> 个岗位</div>
+      <button class="text-btn" id="clearFilters">清除筛选</button>
+    </section>
+
+    <section class="job-grid" id="jobGrid" aria-live="polite"></section>
+    <div class="empty" id="emptyState" hidden>
+      <h2>没有符合当前条件的岗位</h2>
+      <p>清除筛选或换一个关键词。</p>
+    </div>
+  </main>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-backdrop" data-close></div>
+    <article class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <button class="close-btn" data-close aria-label="关闭">×</button>
+      <div id="drawerContent"></div>
+    </article>
+  </aside>
+
+  <aside class="modal" id="jobModal" aria-hidden="true">
+    <div class="modal-backdrop" data-modal-close></div>
+    <form class="modal-panel" id="jobForm">
+      <button type="button" class="close-btn" data-modal-close aria-label="关闭">×</button>
+      <p class="eyebrow">IMPORT</p>
+      <h2>导入微信内推或招聘岗位</h2>
+      <p class="form-help">先填公司和岗位即可。聊天文字或完整JD会原样保存在本机，之后再核验，不会被当作可信指令。</p>
+      <div class="form-grid">
+        <label>公司名称<input name="company" required placeholder="例如：博世中国"></label>
+        <label>岗位名称<input name="role" required placeholder="例如：系统测试工程师"></label>
+        <label>城市<input name="city" placeholder="例如：苏州"></label>
+        <label>官方链接<input name="url" type="url" placeholder="https://..."></label>
+      </div>
+      <label class="full-label">内推文字或JD<textarea name="rawText" placeholder="可直接粘贴微信聊天、岗位职责、任职要求、截止日期、内推码等。请先删除不需要保存的私人信息。"></textarea></label>
+      <label class="full-label">来源备注<input name="sourceNote" placeholder="例如：微信内推，联系人已另存"></label>
+      <label class="check-row"><input name="createResume" type="checkbox" checked><span>保存后立即进入岗位简历生成</span></label>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" data-modal-close>取消</button>
+        <button type="submit" class="primary-btn">保存并进入待核实</button>
+      </div>
+    </form>
+  </aside>
+
+  <template id="jobCardTemplate">
+    <article class="job-card">
+      <div class="card-top">
+        <div>
+          <p class="company"></p>
+          <h2 class="role"></h2>
+        </div>
+        <button class="star-btn" aria-label="收藏岗位">☆</button>
+      </div>
+      <div class="tags"></div>
+      <p class="meta"></p>
+      <p class="next"></p>
+      <div class="card-bottom">
+        <select class="status-select" aria-label="申请状态"></select>
+        <button class="detail-btn">查看详情</button>
+      </div>
+      <button class="resume-btn">生成岗位简历</button>
+    </article>
+  </template>
+
+  <aside class="modal" id="resumeModal" aria-hidden="true">
+    <div class="modal-backdrop" data-resume-close></div>
+    <form class="modal-panel resume-modal-panel" id="resumeForm">
+      <button type="button" class="close-btn" data-resume-close aria-label="关闭">×</button>
+      <p class="eyebrow">RESUME FACTORY</p>
+      <h2>生成岗位专用简历</h2>
+      <p class="form-help">先确认岗位和JD，再复制任务给AI。AI只使用项目中已有的真实材料，并生成经过排版检查的DOCX。</p>
+      <label class="full-label">选择岗位<select id="resumeJobSelect"></select></label>
+      <div class="form-grid">
+        <label>公司<input id="resumeCompany" readonly></label>
+        <label>岗位<input id="resumeRole" readonly></label>
+        <label>城市<input id="resumeCity" readonly></label>
+        <label>简历方向<select id="resumeFocus"><option>测试验证</option><option>应用技术</option><option>制造工艺</option></select></label>
+      </div>
+      <label class="full-label">完整JD或内推文字<textarea id="resumeJD" placeholder="可补充粘贴完整岗位职责和任职要求。没有完整JD也可以先生成核验任务。"></textarea></label>
+      <label class="full-label">本次补充说明<textarea id="resumeExtra" class="short-textarea" placeholder="例如：重点突出德语、压缩某段经历、公司要求两页以内……"></textarea></label>
+      <div class="truth-note">固定边界：不编造成绩、项目、专利、工具熟练度和量化成果；德国实验按小组共同参与表述；论文只使用项目中可核实的信息。</div>
+      <div class="resume-output-box">
+        <label class="full-label">已生成的文件名<input id="resumeFileName" placeholder="例如：陈杰_2027届简历_测试验证_公司_岗位.docx"></label>
+        <button type="button" class="ghost-btn" id="saveResumeLink">关联到这个岗位</button>
+        <p class="form-help" id="resumeLinkHint">AI生成完成后会自动填写；也可以在这里手动登记文件名。</p>
+      </div>
+      <div class="modal-actions resume-actions">
+        <button type="button" class="ghost-btn" id="downloadResumeTask">下载任务单</button>
+        <button type="button" class="primary-btn" id="copyResumeTask">复制任务给AI</button>
+      </div>
+    </form>
+  </aside>
+
+  <script src="jobs-data.js"></script>
+  <script src="app-v2.js"></script>
+</body>
+</html>
