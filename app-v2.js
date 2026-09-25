@@ -1,5 +1,6 @@
 (() => {
   let baseJobs = window.JOB_DATA || [];
+  let discoveredJobs = [];
   const statusOptions = ['已发现', '待核实', '材料就绪', '待本人操作', '已提交', '笔试/面试', '结束'];
   const decisionScore = {'优先投': 0, '优先筛选': 1, '可尝试': 2, '待核实': 3, '不符合': 9};
   const storageKey = 'chenjie-job-board-v2';
@@ -29,7 +30,11 @@
     resumeModal: $('resumeModal'), resumeForm: $('resumeForm'), resumeJobSelect: $('resumeJobSelect')
   };
 
-  const allJobs = () => [...baseJobs, ...(store.customJobs || [])];
+  const allJobs = () => {
+    const merged = new Map();
+    [...discoveredJobs, ...baseJobs, ...(store.customJobs || [])].forEach(job => merged.set(job.id, job));
+    return [...merged.values()];
+  };
   const local = job => store.jobs[job.id] || {};
   const currentStatus = job => local(job).status || job.status;
   const currentNote = job => local(job).note || '';
@@ -87,8 +92,15 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const jobs = await response.json();
       if (!Array.isArray(jobs) || jobs.some(j => !j || !j.id || !j.company || !j.role)) throw new Error('岗位数据格式不正确');
+      const discoveryUrl = window.DISCOVERY_UPDATE_URL || 'discoveries.json';
+      try {
+        const discoverySeparator = discoveryUrl.includes('?') ? '&' : '?';
+        const discoveryResponse = await fetch(`${discoveryUrl}${discoverySeparator}v=${Date.now()}`, {cache: 'no-store'});
+        const discoveries = discoveryResponse.ok ? await discoveryResponse.json() : [];
+        discoveredJobs = Array.isArray(discoveries) ? discoveries.filter(j => j && j.id && j.company && j.role) : [];
+      } catch { discoveredJobs = []; }
       baseJobs = jobs; const checkedAt = new Date(); storage.setItem(`${storageKey}-last-sync`, checkedAt.toISOString());
-      setSyncState('online', '已连接在线岗位库', `${jobs.length}个岗位 · ${checkedAt.toLocaleString('zh-CN')}更新`); render();
+      setSyncState('online', '已连接在线岗位库', `${jobs.length}个正式岗位 · ${discoveredJobs.length}条每日发现 · ${checkedAt.toLocaleString('zh-CN')}更新`); render();
     } catch (error) {
       setSyncState('error', '在线更新暂不可用', `继续使用已保存的${baseJobs.length}个岗位 · ${error.message}`);
       if (manual) window.setTimeout(() => setSyncState('error', '在线更新暂不可用', '当前数据仍可正常查看和记录'), 2500);
@@ -224,7 +236,7 @@
       card.dataset.id = job.id; card.querySelector('.company').textContent = job.company; card.querySelector('.role').textContent = job.role;
       card.querySelector('.meta').textContent = `${job.city || '城市待核实'} · ${job.resume || '简历待定'}`;
       card.querySelector('.next').textContent = job.next;
-      card.querySelector('.tags').innerHTML = `<span class="tag ${tagClass(job.decision)}">${escapeHtml(job.decision)}</span><span class="tag">${escapeHtml(currentStatus(job))}</span><span class="tag score-tag">准备度 ${r.score}</span>${hasTailoredResume(job) ? '<span class="tag resume-ready-tag">专用简历</span>' : ''}${local(job).resumeRequestAt && !hasTailoredResume(job) ? '<span class="tag resume-request-tag">简历制作中</span>' : ''}${job.deadline ? `<span class="tag">截止 ${escapeHtml(job.deadline)}</span>` : ''}`;
+      card.querySelector('.tags').innerHTML = `<span class="tag ${tagClass(job.decision)}">${escapeHtml(job.decision)}</span><span class="tag">${escapeHtml(currentStatus(job))}</span>${job.auto_discovered ? '<span class="tag auto-tag">每日发现</span>' : ''}<span class="tag score-tag">准备度 ${r.score}</span>${hasTailoredResume(job) ? '<span class="tag resume-ready-tag">专用简历</span>' : ''}${local(job).resumeRequestAt && !hasTailoredResume(job) ? '<span class="tag resume-request-tag">简历制作中</span>' : ''}${job.deadline ? `<span class="tag">截止 ${escapeHtml(job.deadline)}</span>` : ''}`;
       const star = card.querySelector('.star-btn'); star.textContent = isFavorite(job) ? '★' : '☆'; star.classList.toggle('active', isFavorite(job));
       star.addEventListener('click', () => { updateLocal(job, {favorite: !isFavorite(job)}); render(); });
       const status = card.querySelector('.status-select');

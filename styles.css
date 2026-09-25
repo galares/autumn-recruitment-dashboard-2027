@@ -161,6 +161,7 @@ main { max-width: 1480px; margin: 0 auto; padding: 0 36px 64px; }
 .tag.score-tag { color: #405b54; background: #eaf0ed; }
 .tag.resume-ready-tag { color: #07564e; background: #c9eee6; }
 .tag.resume-request-tag { color: #765916; background: #fff0bd; }
+.tag.auto-tag { color: #18527a; background: #dceefa; }
 .meta { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
 .next { color: #3f4c48; line-height: 1.65; margin: 0 0 18px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .card-bottom { margin-top: auto; display: flex; gap: 8px; align-items: center; }
