@@ -14,7 +14,7 @@ jobs:
   discover:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check Berlin execution hour
         id: time_gate
@@ -27,10 +27,11 @@ jobs:
             if [ "$HOUR" = "10" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; else echo "run=false" >> "$GITHUB_OUTPUT"; fi
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.time_gate.outputs.run == 'true'
         with:
           node-version: '22'
+          package-manager-cache: false
 
       - name: Search official sources and web results
         if: steps.time_gate.outputs.run == 'true'
