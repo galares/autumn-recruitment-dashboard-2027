@@ -256,7 +256,12 @@
     const resume = job.resume || '';
     const savedFile = String(local(job).resumeFile || job.resume_file || '').split(/[\\/]/).pop();
     if (savedFile && /\.docx$/i.test(savedFile)) {
-      if (window.ONLINE_PUBLIC_MODE) return `<span class="file-chip">${escapeHtml(savedFile.replace(/\.docx$/i, ''))}（个人文件未公开）</span>`;
+      if (window.ONLINE_PUBLIC_MODE) {
+        const privateUrl = safeUrl(job.private_resume_url || '');
+        return privateUrl
+          ? `<a class="file-chip" href="${escapeHtml(privateUrl)}" target="_blank" rel="noreferrer">${escapeHtml(savedFile.replace(/\.docx$/i, ''))}（私人下载）</a>`
+          : `<span class="file-chip">${escapeHtml(savedFile.replace(/\.docx$/i, ''))}（个人文件未公开）</span>`;
+      }
       return `<a class="file-chip" href="../resumes/${encodeURIComponent(savedFile)}">${escapeHtml(savedFile.replace(/\.docx$/i, ''))}</a>`;
     }
     if (resume.includes('TE泰科电子')) {
