@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b5c55">
   <meta name="robots" content="noindex,nofollow">
   <title>陈杰 · 2027秋招看板</title>
-  <link rel="stylesheet" href="styles.css?v=1790320621859">
+  <link rel="stylesheet" href="styles.css?v=1790322333199">
 </head>
 <body>
   <header class="topbar">
@@ -17,7 +17,7 @@
     </div>
     <div class="header-actions">
 
-      <button class="ghost-btn" id="resumeFactoryBtn">简历工厂</button>
+      <button class="ghost-btn" id="resumeFactoryBtn">交给AI</button>
       <button class="ghost-btn" id="addJobBtn">导入岗位</button>
       <button class="ghost-btn" id="restoreBtn">恢复备份</button>
       <button class="ghost-btn" id="exportBtn">备份数据</button>
@@ -36,14 +36,14 @@
 
     <section class="resume-factory" aria-labelledby="resumeFactoryTitle">
       <div>
-        <p class="eyebrow">RESUME FACTORY</p>
-        <h2 id="resumeFactoryTitle">一岗一版简历</h2>
-        <p>选择岗位后自动整理公司、JD、匹配证据和能力缺口，交给AI生成并检查岗位版DOCX。</p>
+        <p class="eyebrow">AI EXECUTION</p>
+        <h2 id="resumeFactoryTitle">把求职任务交给AI</h2>
+        <p>选择岗位和任务类型；AI负责核验、生成简历、检查材料并更新看板，关键提交再由你确认。</p>
       </div>
       <div class="factory-status">
         <span><strong id="resumeLinkedCount">0</strong> 个岗位已关联专用简历</span>
-        <span><strong id="resumeRequestCount">0</strong> 个岗位已发起定制</span>
-        <button class="primary-btn" id="resumeFactoryMainBtn">选择岗位生成简历</button>
+        <span><strong id="resumeRequestCount">0</strong> 个岗位已打开AI确认页</span>
+        <button class="primary-btn" id="resumeFactoryMainBtn">选择岗位交给AI</button>
       </div>
     </section>
 
@@ -156,7 +156,7 @@
         <select class="status-select" aria-label="申请状态"></select>
         <button class="detail-btn">查看详情</button>
       </div>
-      <button class="resume-btn">生成岗位简历</button>
+      <button class="resume-btn">交给AI处理</button>
     </article>
   </template>
 
@@ -165,9 +165,9 @@
     <form class="modal-panel resume-modal-panel" id="resumeForm">
       <header class="resume-modal-header">
         <div>
-          <p class="eyebrow">RESUME FACTORY</p>
-          <h2>生成岗位专用简历</h2>
-          <p class="form-help">确认岗位和JD后，复制任务给AI生成并检查DOCX。</p>
+          <p class="eyebrow">AI EXECUTION</p>
+          <h2>把这个岗位交给AI</h2>
+          <p class="form-help">确认任务后进入私人处理单；你提交即表示授权AI开始执行。</p>
         </div>
         <button type="button" class="close-btn" data-resume-close aria-label="关闭">×</button>
       </header>
@@ -178,24 +178,20 @@
           <label>岗位<input id="resumeRole" readonly></label>
           <label>城市<input id="resumeCity" readonly></label>
           <label>简历方向<select id="resumeFocus"><option>测试验证</option><option>应用技术</option><option>制造工艺</option></select></label>
+          <label>交给AI做什么<select id="resumeTaskType"><option>核验岗位并给出结论</option><option selected>生成岗位专用简历</option><option>准备网申材料</option><option>准备投递并等待确认</option></select></label>
         </div>
         <label class="full-label">完整JD或内推文字<textarea id="resumeJD" placeholder="可补充粘贴完整岗位职责和任职要求。没有完整JD也可以先生成核验任务。"></textarea></label>
         <label class="full-label">本次补充说明<textarea id="resumeExtra" class="short-textarea" placeholder="例如：重点突出德语、压缩某段经历、公司要求两页以内……"></textarea></label>
-        <div class="truth-note">固定边界：不编造成绩、项目、专利、工具熟练度和量化成果；德国实验按小组共同参与表述；论文只使用项目中可核实的信息。</div>
-        <div class="resume-output-box">
-          <label class="full-label">已生成的文件名<input id="resumeFileName" placeholder="例如：陈杰_2027届简历_测试验证_公司_岗位.docx"></label>
-          <button type="button" class="ghost-btn" id="saveResumeLink">关联到这个岗位</button>
-          <p class="form-help" id="resumeLinkHint">AI生成完成后会自动填写；也可以在这里手动登记文件名。</p>
-        </div>
+        <div class="truth-note">AI负责：核验要求、选择真实经历、生成并检查DOCX、保存文件并关联岗位、更新看板。你只在登录、验证码、未知事实和最终提交时确认。固定边界：不编造成绩、项目、专利、技能熟练度和量化成果。</div>
       </div>
       <div class="modal-actions resume-actions">
-        <button type="button" class="ghost-btn" id="downloadResumeTask">下载任务单</button>
-        <button type="button" class="primary-btn" id="copyResumeTask">复制任务给AI</button>
+        <button type="button" class="ghost-btn" data-resume-close>暂不处理</button>
+        <button type="button" class="primary-btn" id="sendToAi">交给AI处理</button>
       </div>
     </form>
   </aside>
 
-  <script src="jobs-data.js?v=1790320621859"></script>
-  <script src="app-v2.js?v=1790320621859"></script>
+  <script src="jobs-data.js?v=1790322333199"></script>
+  <script src="app-v2.js?v=1790322333199"></script>
 </body>
 </html>

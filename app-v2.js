@@ -190,7 +190,7 @@
   function renderResumeFactory() {
     const jobs = allJobs();
     $('resumeLinkedCount').textContent = jobs.filter(hasTailoredResume).length;
-    $('resumeRequestCount').textContent = jobs.filter(j => local(j).resumeRequestAt).length;
+    $('resumeRequestCount').textContent = jobs.filter(j => local(j).aiTaskDraftAt).length;
   }
   function miniItem(job, note) {
     const r = readiness(job);
@@ -236,7 +236,7 @@
       card.dataset.id = job.id; card.querySelector('.company').textContent = job.company; card.querySelector('.role').textContent = job.role;
       card.querySelector('.meta').textContent = `${job.city || '城市待核实'} · ${job.resume || '简历待定'}`;
       card.querySelector('.next').textContent = job.next;
-      card.querySelector('.tags').innerHTML = `<span class="tag ${tagClass(job.decision)}">${escapeHtml(job.decision)}</span><span class="tag">${escapeHtml(currentStatus(job))}</span>${job.auto_discovered ? '<span class="tag auto-tag">每日发现</span>' : ''}<span class="tag score-tag">准备度 ${r.score}</span>${hasTailoredResume(job) ? '<span class="tag resume-ready-tag">专用简历</span>' : ''}${local(job).resumeRequestAt && !hasTailoredResume(job) ? '<span class="tag resume-request-tag">简历制作中</span>' : ''}${job.deadline ? `<span class="tag">截止 ${escapeHtml(job.deadline)}</span>` : ''}`;
+      card.querySelector('.tags').innerHTML = `<span class="tag ${tagClass(job.decision)}">${escapeHtml(job.decision)}</span><span class="tag">${escapeHtml(currentStatus(job))}</span>${job.auto_discovered ? '<span class="tag auto-tag">每日发现</span>' : ''}<span class="tag score-tag">准备度 ${r.score}</span>${hasTailoredResume(job) ? '<span class="tag resume-ready-tag">专用简历</span>' : ''}${local(job).aiTaskDraftAt && !hasTailoredResume(job) ? '<span class="tag resume-request-tag">AI任务待确认</span>' : ''}${job.deadline ? `<span class="tag">截止 ${escapeHtml(job.deadline)}</span>` : ''}`;
       const star = card.querySelector('.star-btn'); star.textContent = isFavorite(job) ? '★' : '☆'; star.classList.toggle('active', isFavorite(job));
       star.addEventListener('click', () => { updateLocal(job, {favorite: !isFavorite(job)}); render(); });
       const status = card.querySelector('.status-select');
@@ -278,7 +278,7 @@
       ${requireProof ? '<div class="notice">要标记为“已提交”，请先保存成功页面、申请编号或确认邮件信息。</div>' : ''}
       <section class="readiness-card"><div><strong>推进准备度 ${r.score}/100</strong><span>用于衡量资料是否齐全，不等于岗位匹配率</span></div><div class="progress"><i style="width:${r.score}%"></i></div><div class="check-grid">${r.checks.map(x => `<span class="${x.ok ? 'done' : ''}">${x.ok ? '✓' : '○'} ${escapeHtml(x.label)}</span>`).join('')}</div></section>
       ${block('匹配理由', job.fit)}${block('资格依据', job.qualification)}${block('缺口与不确定性', job.gaps, 'risk-block')}${block('下一步', job.next)}${block('薪资信息', job.salary)}${block('限投与修改规则', job.quota)}${block('截止信息', job.deadline || job.deadline_note)}${block('来源备注', job.sourceNote)}${job.rawText ? block('导入的原始文字', job.rawText, 'raw-text') : ''}
-      <section class="detail-block"><h3>使用简历</h3><div class="file-chips">${resumeLinks(job)}</div><button class="resume-inline-btn" id="makeResume">生成 / 更新岗位专用简历</button></section>
+      <section class="detail-block"><h3>使用简历</h3><div class="file-chips">${resumeLinks(job)}</div><button class="resume-inline-btn" id="makeResume">交给AI处理</button></section>
       <section class="detail-block"><h3>信息来源</h3><p class="link-line">${sourceLinks(job)}</p></section>
       <div class="detail-actions">${official ? `<a class="official-link" href="${escapeHtml(official)}" target="_blank" rel="noreferrer">打开官方页面</a>` : ''}<button class="secondary-action" id="copyVerify">复制给AI核验</button></div>
       <section class="detail-block proof-block"><h3>投递凭证</h3><p class="form-help">只有保存成功页面、申请编号、确认邮件或等效证据后，才会标记为已提交。</p><div class="form-grid proof-grid"><label>凭证类型<select id="evidenceType"><option>申请编号</option><option>成功页面</option><option>确认邮件</option><option>其他等效证据</option></select></label><label>提交时间<input id="submittedAt" type="datetime-local" value="${escapeHtml(info.submittedAt || '')}"></label></div><label class="full-label">凭证内容<input id="receiptInput" value="${escapeHtml(info.receipt || '')}" placeholder="填写申请编号，或说明截图/确认邮件保存位置"></label><button class="save-note" id="saveProof">保存凭证并标记已提交</button><p class="inline-error" id="proofError"></p></section>
@@ -321,8 +321,7 @@
     $('resumeFocus').value = ['测试验证','应用技术','制造工艺'].includes(info.resumeFocus) ? info.resumeFocus : family;
     $('resumeJD').value = info.resumeJD || job.rawText || `任职资格：${job.qualification || '待补充'}\n\n岗位信息：${job.fit || ''}`;
     $('resumeExtra').value = info.resumeExtra || '';
-    $('resumeFileName').value = info.resumeFile || job.resume_file || '';
-    $('resumeLinkHint').textContent = hasTailoredResume(job) ? '这个岗位已经关联专用简历；重新生成后可替换文件名。' : '生成完成后登记文件名，岗位卡片会显示“专用简历”。';
+    $('resumeTaskType').value = info.aiTaskType || '生成岗位专用简历';
   }
   function openResumeModal(job) {
     const candidates = allJobs().filter(j => currentStatus(j) !== '结束' && j.decision !== '不符合').sort((a,b) => actionRank(b) - actionRank(a));
@@ -332,18 +331,21 @@
     const body = els.resumeForm.querySelector('.resume-modal-body'); if (body) body.scrollTop = 0;
   }
   function closeResumeModal() { els.resumeModal.classList.remove('open'); els.resumeModal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
-  function buildResumePrompt(job) {
-    const focus = $('resumeFocus').value; const jd = $('resumeJD').value.trim(); const extra = $('resumeExtra').value.trim();
-    const outputFile = $('resumeFileName').value.trim() || suggestedResumeFile(job, focus);
-    return `请继续执行陈杰的2027届秋招任务，为下面这个岗位生成一份真实、针对性的中文DOCX简历。请直接完成文件，不要只给修改建议。\n\n【岗位】\n公司：${job.company}\n岗位：${job.role}\n城市：${job.city || '待核实'}\n官方链接：${job.url || '未提供'}\n简历方向：${focus}\n\n【JD或岗位信息】\n${jd || '尚未取得完整JD，请先从官方页面核验后再定制。'}\n\n【本次补充要求】\n${extra || '无额外要求，以岗位硬性条件和真实匹配度为准。'}\n\n【必须遵守】\n1. 使用当前“找工作”项目已有的原始简历、实验报告、论文材料和已确认个人信息建立事实依据；以前生成的简历措辞不能单独作为新增事实。\n2. 不得添加不存在的项目、成绩、排名、专利、工具熟练度、客户经验或量化成果。德国实验按小组共同参与、互相讨论表述，不能写成独立负责全部工作。\n3. 先逐条对照JD，把真实匹配的经历放前面；技能缺口不要伪装成经验。保持国内校招常用的一页中文简历，内容确有必要时才使用两页。\n4. 保留原始文件，在 output/autumn2027/resumes/ 下生成：${outputFile}\n5. 生成后必须渲染检查版式，确认无截断、重叠、异常分页和不可读字号。\n6. 将最终文件名关联回岗位 ${job.id}，更新看板数据和投递记录；没有成功回执时不得标为已提交。\n7. 完成后告诉我：改了什么、为什么匹配、仍有哪些真实缺口，以及文件入口。`;
+  const requestRepo = 'galares/autumn-recruitment-requests';
+  function buildAiRequest(job) {
+    const taskType = $('resumeTaskType').value; const focus = $('resumeFocus').value;
+    const jd = $('resumeJD').value.trim(); const extra = $('resumeExtra').value.trim();
+    const outputFile = suggestedResumeFile(job, focus);
+    return `## AI执行任务\n\n- 任务：${taskType}\n- 岗位ID：${job.id}\n- 公司：${job.company}\n- 岗位：${job.role}\n- 城市：${job.city || '待核实'}\n- 官方链接：${job.url || '未提供'}\n- 简历方向：${focus}\n- 建议输出文件：output/autumn2027/resumes/${outputFile}\n\n## JD或内推文字\n\n${jd || '尚未取得完整JD，请先核验官方页面。'}\n\n## 本次补充说明\n\n${extra || '无额外要求，以岗位硬性条件和真实匹配度为准。'}\n\n## 执行要求\n\n1. 优先核验企业官网和官方校招入口，确认岗位有效性、2027届海外硕士毕业窗口、专业、技能、城市、截止日期、薪资和限投规则。\n2. 使用“找工作”项目内已有原始简历、报告、论文材料和用户明确确认的信息。以前生成的简历措辞不能单独作为新增事实。\n3. 不得添加不存在的成绩、排名、项目、专利、技能熟练度或量化成果；德国实验按小组共同参与、互相讨论表述。\n4. 如任务涉及简历，直接生成DOCX并渲染检查，保存到 resumes 文件夹，自动命名并关联岗位，无需用户填写文件名。\n5. 如任务涉及投递，先准备并检查资料；遇到登录、验证码、未知必填事实或最终提交时再请用户确认。没有成功页面、申请编号或确认邮件时不得标记“已提交”。\n6. 完成后更新看板与投递记录，并说明已完成内容、真实缺口和文件入口。\n\n> 此任务由求职看板创建。提交该私人任务单表示授权AI按以上范围开始处理。请勿在任务单中填写密码或验证码。`;
   }
-  function recordResumeRequest(job, event) {
-    updateLocal(job, {resumeRequestAt: new Date().toISOString(), resumeFocus: $('resumeFocus').value, resumeJD: $('resumeJD').value, resumeExtra: $('resumeExtra').value}, event);
-    render();
-  }
-  function downloadText(name, content) {
-    const blob = new Blob([content], {type: 'text/plain;charset=utf-8'}); const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href);
+  function openPrivateRequest(job) {
+    const taskType = $('resumeTaskType').value; const focus = $('resumeFocus').value;
+    const title = `[AI任务] ${taskType}｜${job.company}｜${job.role}`;
+    const body = buildAiRequest(job).slice(0, 7000);
+    updateLocal(job, {aiTaskDraftAt: new Date().toISOString(), aiTaskType: taskType, resumeFocus: focus, resumeJD: $('resumeJD').value, resumeExtra: $('resumeExtra').value}, '已打开私人AI任务确认页，等待提交确认');
+    const url = `https://github.com/${requestRepo}/issues/new?labels=ai-task&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+    window.open(url, '_blank', 'noopener');
+    closeResumeModal(); render();
   }
 
   function exportBackup() {
@@ -375,24 +377,7 @@
   $('resumeFactoryBtn').addEventListener('click', () => openResumeModal()); $('resumeFactoryMainBtn').addEventListener('click', () => openResumeModal());
   els.restoreInput.addEventListener('change', () => { if (els.restoreInput.files[0]) restoreBackup(els.restoreInput.files[0]); });
   els.resumeJobSelect.addEventListener('change', () => populateResumeForm(selectedResumeJob()));
-  $('resumeFocus').addEventListener('change', () => {
-    const job = selectedResumeJob(); if (!job || $('resumeFileName').value.trim()) return;
-    $('resumeFileName').placeholder = suggestedResumeFile(job, $('resumeFocus').value);
-  });
-  $('copyResumeTask').addEventListener('click', () => {
-    const job = selectedResumeJob(); if (!job) return;
-    const prompt = buildResumePrompt(job); recordResumeRequest(job, '已复制岗位简历定制任务给AI'); copyText(prompt, $('copyResumeTask'));
-  });
-  $('downloadResumeTask').addEventListener('click', () => {
-    const job = selectedResumeJob(); if (!job) return;
-    recordResumeRequest(job, '已下载岗位简历定制任务单');
-    downloadText(`简历定制任务_${job.company}_${job.role}.txt`.replace(/[\\/:*?"<>|]/g, ''), buildResumePrompt(job));
-  });
-  $('saveResumeLink').addEventListener('click', () => {
-    const job = selectedResumeJob(); if (!job) return; const file = $('resumeFileName').value.trim().split(/[\\/]/).pop();
-    if (!/\.docx$/i.test(file)) { $('resumeLinkHint').textContent = '请填写以 .docx 结尾的文件名。'; return; }
-    updateLocal(job, {resumeFile: file}, `关联岗位专用简历：${file}`); $('resumeLinkHint').textContent = '已关联到岗位；请确认文件确实位于 resumes 文件夹。'; render();
-  });
+  $('sendToAi').addEventListener('click', () => { const job = selectedResumeJob(); if (job) openPrivateRequest(job); });
   els.form.addEventListener('submit', e => {
     e.preventDefault(); const data = new FormData(els.form); const id = `CUSTOM-${Date.now()}`; const url = safeUrl(data.get('url'));
     const createResume = data.get('createResume') === 'on';
