@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b5c55">
   <meta name="robots" content="noindex,nofollow">
   <title>陈杰 · 2027秋招看板</title>
-  <link rel="stylesheet" href="styles.css?v=1790383445559">
+  <link rel="stylesheet" href="styles.css?v=1790383877690">
 </head>
 <body>
   <header class="topbar">
@@ -37,13 +37,13 @@
     <section class="resume-factory" aria-labelledby="resumeFactoryTitle">
       <div>
         <p class="eyebrow">AI EXECUTION</p>
-        <h2 id="resumeFactoryTitle">把求职任务交给AI</h2>
-        <p>选择岗位和任务类型；AI负责核验、生成简历、检查材料并更新看板，关键提交再由你确认。</p>
+        <h2 id="resumeFactoryTitle">一键交给AI处理</h2>
+        <p>岗位卡片直接点击“智能处理”；AI自动选择简历方向、核验岗位、生成并检查文件。只有特殊要求才打开高级设置。</p>
       </div>
       <div class="factory-status">
         <span><strong id="resumeLinkedCount">0</strong> 个岗位已关联专用简历</span>
-        <span><strong id="resumeRequestCount">0</strong> 个岗位已打开AI确认页</span>
-        <button class="primary-btn" id="resumeFactoryMainBtn">选择岗位交给AI</button>
+        <span><strong id="resumeRequestCount">0</strong> 个岗位已进入AI确认流程</span>
+        <button class="primary-btn" id="resumeFactoryMainBtn">高级设置</button>
       </div>
     </section>
 
@@ -156,7 +156,7 @@
         <select class="status-select" aria-label="申请状态"></select>
         <button class="detail-btn">查看详情</button>
       </div>
-      <button class="resume-btn">交给AI处理</button>
+      <button class="resume-btn">智能处理</button>
     </article>
   </template>
 
@@ -166,8 +166,8 @@
       <header class="resume-modal-header">
         <div>
           <p class="eyebrow">AI EXECUTION</p>
-          <h2>把这个岗位交给AI</h2>
-          <p class="form-help">确认任务后进入私人处理单；你提交即表示授权AI开始执行。</p>
+          <h2>AI高级设置</h2>
+          <p class="form-help">普通岗位无需填写；只有想指定简历方向、补充JD或提出特殊要求时使用。</p>
         </div>
         <button type="button" class="close-btn" data-resume-close aria-label="关闭">×</button>
       </header>
@@ -191,7 +191,7 @@
     </form>
   </aside>
 
-  <script src="jobs-data.js?v=1790383445559"></script>
-  <script src="app-v2.js?v=1790383445559"></script>
+  <script src="jobs-data.js?v=1790383877690"></script>
+  <script src="app-v2.js?v=1790383877690"></script>
 </body>
 </html>
